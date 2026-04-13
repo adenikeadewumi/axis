@@ -994,17 +994,32 @@ Be direct, warm, and connect it to her quantum-finance company goal. No fluff.`;
 }
 
 // ── Claude API ─────────────────────────────────────────────────────────────
+// NEW (SECURE) — calls your backend instead
 async function callClaude(messages) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: SYSTEM_PROMPT,
-      messages
-    })
-  });
+  try {
+    const res = await fetch('http://localhost:3000/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages })
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'API request failed');
+    }
+
+    const data = await res.json();
+    
+    if (data.content && data.content[0] && data.content[0].text) {
+      return data.content[0].text;
+    }
+    
+    throw new Error('Unexpected response format');
+  } catch (error) {
+    console.error('Claude API error:', error);
+    throw error;
+  }
+        }
 
   if (!res.ok) throw new Error('API error');
   const data = await res.json();
