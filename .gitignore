@@ -1,0 +1,17 @@
+.env
+node_modules/
+# Logs
+logs/
+*.log
+# Dependency directories
+jspm_packages/
+yarn-error.log
+# Build output
+dist/
+build/
+# Temporary files
+*.tmp
+*.temp
+# System files
+.DS_Store
+Thumbs.db
