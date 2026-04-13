@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIS — Your Accountability Partner</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #7b61ff;
+    --accent3: #ff6b35;
+    --text: #f0f0f8;
+    --muted: #6b6b8a;
+    --danger: #ff4757;
+    --warn: #ffa502;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Mode tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* Panels */
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Chat area */
+  .chat-window {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    height: 380px;
+    overflow-y: auto;
+    padding: 20px;
+    margin-bottom: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .chat-window::-webkit-scrollbar { width: 4px; }
+  .chat-window::-webkit-scrollbar-track { background: transparent; }
+  .chat-window::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg {
+    margin-bottom: 16px;
+    animation: msgIn 0.3s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .msg.user { text-align: right; }
+
+  .msg-bubble {
+    display: inline-block;
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  .msg.ai .msg-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg.user .msg-bubble {
+    background: linear-gradient(135deg, var(--accent2), #5a45cc);
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-sender {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .msg.user .msg-sender { text-align: right; }
+
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+  }
+
+  .typing span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: bounce 1.2s infinite;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* Input area */
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+    height: 52px;
+  }
+
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-input::placeholder { color: var(--muted); }
+
+  .send-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { background: #00ffb3; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; }
+
+  /* Check-in mode buttons */
+  .checkin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .checkin-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+
+  .checkin-btn:hover { border-color: var(--accent); background: rgba(0,229,160,0.05); }
+  .checkin-btn.selected { border-color: var(--accent); background: rgba(0,229,160,0.08); }
+
+  .checkin-btn .icon { font-size: 20px; margin-bottom: 6px; display: block; }
+  .checkin-btn .title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; font-family: 'Syne', sans-serif; }
+  .checkin-btn .sub { font-size: 10px; color: var(--muted); }
+
+  /* Tracker section */
+  .tracker-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .tracker-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .tracker-item .t-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .tracker-item .t-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .tracker-item .t-sub { font-size: 11px; color: var(--muted); }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.6s ease;
+  }
+
+  /* Distraction log */
+  .distraction-log {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .distraction-entry {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+
+  .distraction-entry .d-icon { font-size: 18px; }
+  .distraction-entry .d-text { flex: 1; color: var(--muted); }
+  .distraction-entry .d-time { font-size: 10px; color: var(--border); }
+  .distraction-entry.bad { border-left: 3px solid var(--danger); }
+  .distraction-entry.mid { border-left: 3px solid var(--warn); }
+
+  /* Priority list */
+  .priority-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .priority-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: all 0.2s;
+  }
+
+  .priority-item.done { opacity: 0.5; }
+
+  .priority-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .priority-check:hover { border-color: var(--accent); }
+  .priority-check.checked { background: var(--accent); border-color: var(--accent); color: #000; font-size: 12px; }
+
+  .priority-text { flex: 1; font-size: 12px; }
+  .priority-item.done .priority-text { text-decoration: line-through; color: var(--muted); }
+
+  .priority-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-quantum { background: rgba(0,229,160,0.1); color: var(--accent); }
+  .tag-intern { background: rgba(123,97,255,0.1); color: var(--accent2); }
+  .tag-school { background: rgba(255,107,53,0.1); color: var(--accent3); }
+
+  /* Add priority input */
+  .add-priority {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .add-priority input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+
+  .add-priority input:focus { border-color: var(--accent); }
+  .add-priority input::placeholder { color: var(--muted); }
+
+  .add-priority select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .add-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .add-btn:hover { background: #00ffb3; }
+
+  /* Weekly report */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .day-cell {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .day-cell .d-name { color: var(--muted); margin-bottom: 4px; font-size: 9px; }
+  .day-cell .d-score { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+  .day-cell.good { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.05); }
+  .day-cell.good .d-score { color: var(--accent); }
+  .day-cell.mid { border-color: rgba(255,165,2,0.4); background: rgba(255,165,2,0.05); }
+  .day-cell.mid .d-score { color: var(--warn); }
+  .day-cell.bad { border-color: rgba(255,71,87,0.4); background: rgba(255,71,87,0.05); }
+  .day-cell.bad .d-score { color: var(--danger); }
+  .day-cell.today { outline: 2px solid var(--accent); }
+
+  /* Insight box */
+  .insight-box {
+    background: linear-gradient(135deg, rgba(0,229,160,0.05), rgba(123,97,255,0.05));
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .insight-box::before {
+    content: '// AXIS INSIGHT';
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  /* Loading state */
+  .loading-text {
+    color: var(--muted);
+    font-size: 12px;
+    font-style: italic;
+    padding: 8px 0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .tracker-grid { grid-template-columns: 1fr 1fr; }
+    .checkin-grid { grid-template-columns: 1fr 1fr; }
+    .week-grid { gap: 3px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="logo">AX<span>IS</span></div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span>Active</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('chat')">Chat</button>
+    <button class="tab" onclick="switchTab('checkin')">Check-In</button>
+    <button class="tab" onclick="switchTab('tracker')">Tracker</button>
+    <button class="tab" onclick="switchTab('weekly')">Weekly</button>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="panel active" id="panel-chat">
+    <div class="chat-window" id="chatWindow"></div>
+    <div class="input-row">
+      <textarea class="chat-input" id="chatInput" placeholder="Talk to AXIS..." rows="1"
+        onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+
+  <!-- CHECK-IN PANEL -->
+  <div class="panel" id="panel-checkin">
+    <div class="checkin-grid">
+      <button class="checkin-btn" onclick="startCheckin('morning')">
+        <span class="icon">🌅</span>
+        <div class="title">Morning</div>
+        <div class="sub">Set your day's intention</div>
+      </button>
+      <button class="checkin-btn" onclick="startCheckin('midday')">
+        <span class="icon">⚡</span>
+        <div class="title">Midday</div>
+        <div class="sub">Stay on track</div>
+      </button>
+      <button class="checkin-btn" onclick="startCheckin('evening')">
+        <span class="icon">🌙</span>
+        <div class="title">Evening</div>
+        <div class="sub">Reflect + plan tomorrow</div>
+      </button>
+      <button class="checkin-btn" onclick="startCheckin('weekly')">
+        <span class="icon">📊</span>
+        <div class="title">Weekly</div>
+        <div class="sub">Pattern analysis</div>
+      </button>
+    </div>
+    <div class="chat-window" id="checkinWindow" style="height:300px"></div>
+    <div class="input-row" style="margin-top:12px">
+      <textarea class="chat-input" id="checkinInput" placeholder="Respond to AXIS..." rows="1"
+        onkeydown="handleCheckinKey(event)"></textarea>
+      <button class="send-btn" id="checkinBtn" onclick="sendCheckin()">↑</button>
+    </div>
+  </div>
+
+  <!-- TRACKER PANEL -->
+  <div class="panel" id="panel-tracker">
+    <div class="tracker-grid">
+      <div class="tracker-item">
+        <div class="t-label">Quantum Days</div>
+        <div class="t-value" id="quantumDays">0</div>
+        <div class="t-sub">streak this week</div>
+        <div class="progress-bar"><div class="progress-fill" id="qProgress" style="width:0%"></div></div>
+      </div>
+      <div class="tracker-item">
+        <div class="t-label">Tasks Done</div>
+        <div class="t-value" id="tasksDone">0</div>
+        <div class="t-sub">of <span id="tasksTotal">0</span> today</div>
+        <div class="progress-bar"><div class="progress-fill" id="tProgress" style="width:0%"></div></div>
+      </div>
+      <div class="tracker-item">
+        <div class="t-label">Distractions</div>
+        <div class="t-value" id="distractCount" style="color:var(--warn)">0</div>
+        <div class="t-sub">logged today</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%; background: var(--danger)" id="dProgress"></div></div>
+      </div>
+      <div class="tracker-item">
+        <div class="t-label">Focus Score</div>
+        <div class="t-value" id="focusScore">--</div>
+        <div class="t-sub">today's rating</div>
+        <div class="progress-bar"><div class="progress-fill" id="fProgress" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Today's Priorities</div>
+      <div class="priority-list" id="priorityList">
+        <div style="color:var(--muted); font-size:12px; padding: 8px 0;">No priorities yet. Add one below.</div>
+      </div>
+      <div class="add-priority" style="margin-top:12px">
+        <input type="text" id="priorityInput" placeholder="Add a priority..." onkeydown="if(event.key==='Enter') addPriority()">
+        <select id="priorityTag">
+          <option value="quantum">Quantum</option>
+          <option value="intern">Internship</option>
+          <option value="school">School</option>
+        </select>
+        <button class="add-btn" onclick="addPriority()">Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Distraction Log</div>
+      <div class="distraction-log" id="distractionLog">
+        <div style="color:var(--muted); font-size:12px; padding: 4px 0;">Clean slate. Stay focused.</div>
+      </div>
+      <div class="add-priority" style="margin-top:12px">
+        <input type="text" id="distractInput" placeholder="Log a distraction..." onkeydown="if(event.key==='Enter') logDistraction()">
+        <button class="add-btn" onclick="logDistraction()">Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEKLY PANEL -->
+  <div class="panel" id="panel-weekly">
+    <div class="card">
+      <div class="card-label">This Week's Focus</div>
+      <div class="week-grid" id="weekGrid"></div>
+    </div>
+    <div class="insight-box" id="weeklyInsight">
+      <span class="loading-text">Click "Get Weekly Insight" to generate your analysis.</span>
+    </div>
+    <button class="add-btn" style="width:100%; padding:14px; border-radius:12px; font-size:14px; margin-bottom:12px" onclick="getWeeklyInsight()">
+      ⚡ Get Weekly Insight
+    </button>
+    <div class="chat-window" id="weeklyWindow" style="height:250px; display:none"></div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const state = {
+  priorities: [],
+  distractions: [],
+  quantumDays: 3,
+  checkinContext: '',
+  weekData: [
+    { day: 'Mon', score: 82, cls: 'good' },
+    { day: 'Tue', score: 45, cls: 'bad' },
+    { day: 'Wed', score: 71, cls: 'good' },
+    { day: 'Thu', score: 60, cls: 'mid' },
+    { day: 'Fri', score: 88, cls: 'good' },
+    { day: 'Sat', score: 30, cls: 'bad' },
+    { day: 'Sun', score: null, cls: 'today' }
+  ]
+};
+
+const SYSTEM_PROMPT = `You are AXIS, a brutally honest but deeply supportive AI accountability partner for Adenike — a 300-level Electronic & Electrical Engineering student at OAU, Nigeria.
+
+Her goals:
+- Build expertise in quantum computing applied to finance (her long-term company vision)
+- Complete her quantum-in-finance internship successfully (she cannot share details due to NDA)
+- Stay on top of her EEE coursework and extracurriculars
+- Build a public presence on LinkedIn about quantum computing
+- Learn Qiskit and quantum finance fundamentals
+
+Her main distractions: movies/series binging and social media.
+
+Your personality:
+- Direct, sharp, no fluff — but genuinely warm and invested in her success
+- Call out excuses clearly but never be cruel
+- Celebrate real wins specifically
+- Connect everything back to her 3-year entrepreneurship trajectory toward a quantum-finance company for African markets
+- Use occasional Nigerian context naturally (not forced)
+- Keep responses concise — she's on mobile. Max 4-5 sentences unless she asks for more.
+- When she logs distractions, don't shame — analyze the pattern and redirect
+
+Track these areas: daily priorities, quantum/tech learning, internship goals, extracurricular balance, distraction patterns.`;
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'weekly') renderWeekGrid();
+}
+
+// ── Chat ──────────────────────────────────────────────────────────────────
+let chatHistory = [];
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  appendMsg('chatWindow', 'user', 'You', msg);
+  chatHistory.push({ role: 'user', content: msg });
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+
+  const typingEl = showTyping('chatWindow');
+
+  try {
+    const res = await callClaude(chatHistory);
+    typingEl.remove();
+    appendMsg('chatWindow', 'ai', 'AXIS', res);
+    chatHistory.push({ role: 'assistant', content: res });
+  } catch(e) {
+    typingEl.remove();
+    appendMsg('chatWindow', 'ai', 'AXIS', 'Connection error. Check your network and try again.');
+  }
+
+  btn.disabled = false;
+}
+
+// ── Check-ins ──────────────────────────────────────────────────────────────
+let checkinHistory = [];
+let currentCheckin = '';
+
+const checkinPrompts = {
+  morning: `Start a morning check-in. Ask Adenike 3 focused questions in one message: (1) What are her top 3 priorities today and which category (quantum learning / internship / school / extracurricular)? (2) What is she most likely to get distracted by today? (3) What is she willing to sacrifice to protect her focus? Be energizing and sharp. Keep it under 80 words.`,
+  midday: `Start a midday check-in. Ask her: how are her morning priorities going? Has she been distracted (movies or social media)? What needs to happen in the next 3 hours? Be direct and practical. Under 70 words.`,
+  evening: `Start an evening reflection. Ask her: which priorities did she complete? What distracted her and for how long? What is her single most important task tomorrow? Acknowledge the day honestly. Under 80 words.`,
+  weekly: `Start a weekly review. Reference that she's an OAU EEE student building toward a quantum-finance company for African markets. Ask about: quantum learning progress this week, any internship goals hit, biggest distraction pattern, and one thing to do differently next week. Be analytical. Under 100 words.`
+};
+
+async function startCheckin(type) {
+  currentCheckin = type;
+  checkinHistory = [];
+  document.querySelectorAll('.checkin-btn').forEach(b => b.classList.remove('selected'));
+  event.target.closest('.checkin-btn').classList.add('selected');
+
+  const win = document.getElementById('checkinWindow');
+  win.innerHTML = '';
+
+  const btn = document.getElementById('checkinBtn');
+  btn.disabled = true;
+  const typingEl = showTyping('checkinWindow');
+
+  const initMsg = [{ role: 'user', content: checkinPrompts[type] }];
+
+  try {
+    const res = await callClaude(initMsg);
+    typingEl.remove();
+    appendMsg('checkinWindow', 'ai', 'AXIS', res);
+    checkinHistory.push({ role: 'user', content: checkinPrompts[type] });
+    checkinHistory.push({ role: 'assistant', content: res });
+  } catch(e) {
+    typingEl.remove();
+    appendMsg('checkinWindow', 'ai', 'AXIS', 'Connection error. Try again.');
+  }
+
+  btn.disabled = false;
+}
+
+function handleCheckinKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCheckin(); }
+}
+
+async function sendCheckin() {
+  const input = document.getElementById('checkinInput');
+  const msg = input.value.trim();
+  if (!msg || !currentCheckin) return;
+
+  input.value = '';
+  appendMsg('checkinWindow', 'user', 'You', msg);
+  checkinHistory.push({ role: 'user', content: msg });
+
+  const btn = document.getElementById('checkinBtn');
+  btn.disabled = true;
+  const typingEl = showTyping('checkinWindow');
+
+  try {
+    const res = await callClaude(checkinHistory);
+    typingEl.remove();
+    appendMsg('checkinWindow', 'ai', 'AXIS', res);
+    checkinHistory.push({ role: 'assistant', content: res });
+  } catch(e) {
+    typingEl.remove();
+    appendMsg('checkinWindow', 'ai', 'AXIS', 'Connection error. Try again.');
+  }
+
+  btn.disabled = false;
+}
+
+// ── Tracker ────────────────────────────────────────────────────────────────
+function addPriority() {
+  const input = document.getElementById('priorityInput');
+  const tag = document.getElementById('priorityTag').value;
+  const text = input.value.trim();
+  if (!text) return;
+
+  state.priorities.push({ text, tag, done: false, id: Date.now() });
+  input.value = '';
+  renderPriorities();
+  updateStats();
+}
+
+function togglePriority(id) {
+  const item = state.priorities.find(p => p.id === id);
+  if (item) { item.done = !item.done; renderPriorities(); updateStats(); }
+}
+
+function renderPriorities() {
+  const list = document.getElementById('priorityList');
+  if (state.priorities.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted); font-size:12px; padding: 8px 0;">No priorities yet. Add one below.</div>';
+    return;
+  }
+
+  list.innerHTML = state.priorities.map(p => `
+    <div class="priority-item ${p.done ? 'done' : ''}">
+      <div class="priority-check ${p.done ? 'checked' : ''}" onclick="togglePriority(${p.id})">
+        ${p.done ? '✓' : ''}
+      </div>
+      <div class="priority-text">${p.text}</div>
+      <span class="priority-tag tag-${p.tag}">${p.tag}</span>
+    </div>
+  `).join('');
+}
+
+function logDistraction() {
+  const input = document.getElementById('distractInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const now = new Date();
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const isBad = text.toLowerCase().includes('movie') || text.toLowerCase().includes('series')
+    || text.toLowerCase().includes('instagram') || text.toLowerCase().includes('tiktok')
+    || text.toLowerCase().includes('twitter') || text.toLowerCase().includes('social');
+
+  state.distractions.push({ text, time, bad: isBad, id: Date.now() });
+  input.value = '';
+  renderDistractions();
+  updateStats();
+}
+
+function renderDistractions() {
+  const log = document.getElementById('distractionLog');
+  if (state.distractions.length === 0) {
+    log.innerHTML = '<div style="color:var(--muted); font-size:12px; padding: 4px 0;">Clean slate. Stay focused.</div>';
+    return;
+  }
+
+  log.innerHTML = state.distractions.map(d => `
+    <div class="distraction-entry ${d.bad ? 'bad' : 'mid'}">
+      <span class="d-icon">${d.bad ? '📺' : '⚠️'}</span>
+      <span class="d-text">${d.text}</span>
+      <span class="d-time">${d.time}</span>
+    </div>
+  `).join('');
+}
+
+function updateStats() {
+  const done = state.priorities.filter(p => p.done).length;
+  const total = state.priorities.length;
+  const distracts = state.distractions.length;
+
+  document.getElementById('tasksDone').textContent = done;
+  document.getElementById('tasksTotal').textContent = total;
+  document.getElementById('distractCount').textContent = distracts;
+  document.getElementById('quantumDays').textContent = state.quantumDays;
+
+  const taskPct = total > 0 ? (done / total) * 100 : 0;
+  const distractPct = Math.min(distracts * 20, 100);
+  const focusPct = Math.max(0, taskPct - distractPct * 0.5);
+
+  document.getElementById('tProgress').style.width = taskPct + '%';
+  document.getElementById('dProgress').style.width = distractPct + '%';
+  document.getElementById('qProgress').style.width = (state.quantumDays / 7) * 100 + '%';
+  document.getElementById('fProgress').style.width = focusPct + '%';
+
+  const score = focusPct > 0 ? Math.round(focusPct) + '%' : '--';
+  document.getElementById('focusScore').textContent = score;
+}
+
+// ── Weekly ─────────────────────────────────────────────────────────────────
+function renderWeekGrid() {
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = state.weekData.map(d => `
+    <div class="day-cell ${d.cls} ${d.cls === 'today' ? 'today' : ''}">
+      <span class="d-name">${d.day}</span>
+      <span class="d-score">${d.score !== null ? d.score : '?'}</span>
+    </div>
+  `).join('');
+}
+
+async function getWeeklyInsight() {
+  const box = document.getElementById('weeklyInsight');
+  const win = document.getElementById('weeklyWindow');
+  box.innerHTML = '<span class="loading-text">Analyzing your week...</span>';
+
+  const weekSummary = state.weekData.map(d => `${d.day}: ${d.score ?? 'incomplete'}`).join(', ');
+  const priorities = state.priorities.length > 0
+    ? state.priorities.map(p => `${p.text} (${p.tag}) — ${p.done ? 'done' : 'pending'}`).join('; ')
+    : 'none logged';
+  const distractions = state.distractions.length > 0
+    ? state.distractions.map(d => d.text).join(', ')
+    : 'none logged';
+
+  const prompt = `Analyze Adenike's week as her accountability partner.
+
+Week focus scores (0-100): ${weekSummary}
+Today's priorities: ${priorities}
+Distractions logged: ${distractions}
+Quantum learning streak: ${state.quantumDays} days this week
+
+Give a 3-part analysis in under 120 words:
+1. What the pattern shows about her week
+2. The one most important thing to change next week
+3. One specific action she can take TODAY to end the week strong
+
+Be direct, warm, and connect it to her quantum-finance company goal. No fluff.`;
+
+  try {
+    const res = await callClaude([{ role: 'user', content: prompt }]);
+    box.innerHTML = res;
+    win.style.display = 'block';
+    win.innerHTML = '';
+    appendMsg('weeklyWindow', 'ai', 'AXIS', "That's your week. Any of this surprise you? What do you want to dig into?");
+  } catch(e) {
+    box.innerHTML = 'Connection error. Try again.';
+  }
+}
+
+// ── Claude API ─────────────────────────────────────────────────────────────
+async function callClaude(messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      messages
+    })
+  });
+
+  if (!res.ok) throw new Error('API error');
+  const data = await res.json();
+  return data.content.map(c => c.text || '').join('');
+}
+
+// ── UI Helpers ─────────────────────────────────────────────────────────────
+function appendMsg(windowId, type, sender, text) {
+  const win = document.getElementById(windowId);
+  const div = document.createElement('div');
+  div.className = `msg ${type}`;
+  div.innerHTML = `
+    <div class="msg-sender">${sender}</div>
+    <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>
+  `;
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
+}
+
+function showTyping(windowId) {
+  const win = document.getElementById(windowId);
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = `
+    <div class="msg-sender">AXIS</div>
+    <div class="typing"><span></span><span></span><span></span></div>
+  `;
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
+  return div;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+function init() {
+  updateStats();
+  renderWeekGrid();
+
+  // Welcome message
+  setTimeout(() => {
+    appendMsg('chatWindow', 'ai', 'AXIS',
+      "Hey Adenike. I'm AXIS — your accountability partner. I know your goal: quantum-finance company, African market, built from OAU. I don't do motivation speeches. I track your actions and call out your patterns.\n\nTell me — what's your focus today?");
+  }, 400);
+}
+
+init();
+</script>
+</body>
+</html>
